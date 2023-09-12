@@ -8,8 +8,9 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+
 	"github.com/spf13/viper"
-	
+
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 )
@@ -21,24 +22,19 @@ import (
 
 func getREADME() (string, error) {
 	// Create a context
-    ctx := context.Background()
+	ctx := context.Background()
 
-	// Load the configuration file (assumes it's in the same directory)
+	// Load the configuration file
 	viper.SetConfigFile("config.json")
 	if err := viper.ReadInConfig(); err != nil {
-		// Handle errors loading the configuration file
-		// ...
+		return "", fmt.Errorf("error reading config file: %v", err)
 	}
-	
-    // Retrieve the GitHub access token from the configuration file
-    githubAccessToken := viper.GetString("github_access_token")
-    if githubAccessToken == "" {
-        // Handle the case where the access token is missing or empty in the configuration file
-        // ...
-    }
 
-	// Use the githubAccessToken variable in your code
-    fmt.Println("GitHub Access Token:", githubAccessToken)
+	// Retrieve the GitHub access token from the configuration file
+	githubAccessToken := viper.GetString("github_access_token")
+	if githubAccessToken == "" {
+		return "", fmt.Errorf("GitHub access token is missing or empty in the configuration file")
+	}
 
 	// Create a GitHub client with your personal access token
 	ts := oauth2.StaticTokenSource(
@@ -52,13 +48,13 @@ func getREADME() (string, error) {
 	// Fetch the README file from the repository
 	readme, _, err := client.Repositories.GetReadme(ctx, owner, repo, nil)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error fetching README: %v", err)
 	}
 
 	// Decode the README content
 	readmeContent, err := readme.GetContent()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error decoding README content: %v", err)
 	}
 
 	return readmeContent, nil
@@ -72,35 +68,41 @@ func handleHelloWorld(serverResponse http.ResponseWriter, clientRequest *http.Re
 	fmt.Fprintln(serverResponse, "Hello, this is your /projects endpoint!")
 }
 
-func handleReadme(w http.ResponseWriter, r *http.Request){
-	if r.URL.Path != "/projects" {
-		http.NotFound(w, r)
+func handleReadme(serverResponse http.ResponseWriter, clientRequest *http.Request) {
+	if clientRequest.URL.Path != "/projects" {
+		http.NotFound(serverResponse, clientRequest)
 		return
 	}
 
 	// Fetch the README content from GitHub
 	readmeContent, err := getREADME()
 	if err != nil {
-		http.Error(w, "Error fetching README", http.StatusInternalServerError)
+		http.Error(serverResponse, "Error fetching README", http.StatusInternalServerError)
 		fmt.Println("Error fetching README:", err)
 		return
 	}
 
 	// Set the response content type to plain text
-	w.Header().Set("Content-Type", "text/plain")
+	serverResponse.Header().Set("Content-Type", "text/plain")
 
 	// Send the README content as the HTTP response
-	fmt.Fprintln(w, readmeContent)
+	fmt.Fprintln(serverResponse, readmeContent)
 }
 
 func main() {
-	//This line sets up an HTTP route. It tells the web server that when a request is made 
-	// to the path /projects, it should call the handleProjects function to handle that request.
-	//http.HandleFunc("/projects", handleHelloWorld)
+	// Set up the HTTP server
+	server := &http.Server{
+		Addr: ":8080",
+	}
+
+	// Set up routes
 	http.HandleFunc("/projects", handleReadme)
+	//http.HandleFunc("/projects", handleHelloWorld)
 
 	fmt.Println("Server started on :8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+
+	// Start the server and handle errors
+	if err := server.ListenAndServe(); err != nil {
 		panic(err)
 	}
 }
