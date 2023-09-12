@@ -72,13 +72,13 @@ func TestHandleReadme(t *testing.T) {
 
 func TestGetProjects(t *testing.T){
 	// Mocked readmeContent
-	mockReadmeContent := "Mocked README Content."
+	mockReadmeContent := "github.com/user1/repo1 github.com/user2/repo2 github.com/user3/repo3"
 
 	// Call the GetProjects function with the mocked readmeContent
 	result := GetProjects(mockReadmeContent)
 
 	// Check if the result is a string
-	if reflect.TypeOf(result).Kind() != reflect.String {
-		t.Errorf("Expected a string, got %v", reflect.TypeOf(result))
+	if reflect.TypeOf(result).Kind() != reflect.Slice || reflect.TypeOf(result).Elem().Kind() != reflect.String {
+		t.Errorf("Expected a []string, got %v", reflect.TypeOf(result))
 	}
 }

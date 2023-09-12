@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"regexp"
 
 	"github.com/spf13/viper"
 
@@ -67,8 +68,26 @@ func (g *RealReadmeGetter) GetREADME() (string, error) {
 }
 
 // GetProjects extracts GitHub repo names from README content.
-func GetProjects(readmeContent string) string {
-	return readmeContent
+func GetProjects(readmeContent string) []string {
+	// Define a regular expression pattern to match GitHub repo names
+	re := regexp.MustCompile(`github\.com/([\w\-]+)/([\w\-]+)`)
+
+	// Find all matches in the README content
+	matches := re.FindAllStringSubmatch(readmeContent, -1)
+
+	// Extract the matched repo names
+	var projects []string
+	for _, match := range matches {
+		if len(match) == 3 {
+			// The first element is the full match, the second and third elements are the owner and repo names
+			owner := match[1]
+			repo := match[2]
+			projectName := owner + "/" + repo
+			projects = append(projects, projectName)
+		}
+	}
+
+	return projects
 }
 
 func handleHelloWorld(serverResponse http.ResponseWriter, clientRequest *http.Request) {
@@ -100,6 +119,32 @@ func handleReadme(serverResponse http.ResponseWriter, clientRequest *http.Reques
 	fmt.Fprintln(serverResponse, readmeContent)
 }
 
+func handleProjects(serverResponse http.ResponseWriter, clientRequest *http.Request, readmeGetter ReadmeGetter) {
+	if clientRequest.URL.Path != "/projects" {
+		http.NotFound(serverResponse, clientRequest)
+		return
+	}
+
+	// Fetch the README content from GitHub
+	readmeContent, err := readmeGetter.GetREADME()
+	if err != nil {
+		http.Error(serverResponse, "Error fetching README", http.StatusInternalServerError)
+		fmt.Println("Error fetching README:", err)
+		return
+	}
+
+	// Extract project names from the README content
+	projects := GetProjects(readmeContent)
+
+	// Set the response content type to plain text
+	serverResponse.Header().Set("Content-Type", "text/plain")
+
+	// Send the list of project names as the HTTP response
+	for _, projectName := range projects {
+		fmt.Fprintln(serverResponse, projectName)
+	}
+}
+
 func main() {
 	// Set up the HTTP server
 	server := &http.Server{
@@ -111,7 +156,7 @@ func main() {
 
 	// Set up the route and inject the RealReadmeGetter instance
 	http.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
-		handleReadme(w, r, realReadmeGetter)
+		handleProjects(w, r, realReadmeGetter)
 	})
 	//http.HandleFunc("/projects", handleHelloWorld)
 
