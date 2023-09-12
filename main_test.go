@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"reflect"
 	"testing"
 
 	"net/http"
@@ -69,16 +68,40 @@ func TestHandleReadme(t *testing.T) {
     }
 }
 
-
 func TestGetProjects(t *testing.T){
-	// Mocked readmeContent
-	mockReadmeContent := "github.com/user1/repo1 github.com/user2/repo2 github.com/user3/repo3"
+	// Define some example README content
+	readmeContent := `
+	Here is a project: github.com/owner1/repo1
+	Another project: github.com/owner2/repo2
+	One more project: github.com/owner3/repo3
+	`
 
-	// Call the GetProjects function with the mocked readmeContent
-	result := GetProjects(mockReadmeContent)
+	// Call the GetProjects function with the example README content
+	projects := GetProjects(readmeContent)
 
-	// Check if the result is a string
-	if reflect.TypeOf(result).Kind() != reflect.Slice || reflect.TypeOf(result).Elem().Kind() != reflect.String {
-		t.Errorf("Expected a []string, got %v", reflect.TypeOf(result))
+	// Define the expected output in the requested format
+	expectedOutput := []map[string]string{
+		{"url": "https://github.com/owner1/repo1"},
+		{"url": "https://github.com/owner2/repo2"},
+		{"url": "https://github.com/owner3/repo3"},
 	}
+
+	// Check if the actual output format matches the expected output format
+	if !compareProjects(projects, expectedOutput) {
+		t.Errorf("GetProjects did not produce the expected output")
+	}
+}
+
+// Helper function to compare project lists
+func compareProjects(actual, expected []map[string]string) bool {
+	if len(actual) != len(expected) {
+		return false
+	}
+	for i, a := range actual {
+		e := expected[i]
+		if a["url"] != e["url"] {
+			return false
+		}
+	}
+	return true
 }

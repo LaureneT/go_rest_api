@@ -6,10 +6,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"regexp"
-	"encoding/json"
 
 	"github.com/spf13/viper"
 
@@ -68,23 +68,25 @@ func (g *RealReadmeGetter) GetREADME() (string, error) {
 	return readmeContent, nil
 }
 
-// GetProjects extracts GitHub repo names from README content.
-func GetProjects(readmeContent string) []string {
-	// Define a regular expression pattern to match GitHub repo names
+// GetProjects extracts GitHub repo URLs from README content.
+func GetProjects(readmeContent string) []map[string]string {
+	// Define a regular expression pattern to match GitHub repo URLs
 	re := regexp.MustCompile(`github\.com/([\w\-]+)/([\w\-]+)`)
 
 	// Find all matches in the README content
 	matches := re.FindAllStringSubmatch(readmeContent, -1)
 
-	// Extract the matched repo names
-	var projects []string
+	// Extract the matched repo URLs
+	var projects []map[string]string
 	for _, match := range matches {
 		if len(match) == 3 {
 			// The first element is the full match, the second and third elements are the owner and repo names
 			owner := match[1]
 			repo := match[2]
-			projectName := owner + "/" + repo
-			projects = append(projects, projectName)
+			// Construct the GitHub project URL
+			projectURL := "https://github.com/" + owner + "/" + repo
+			projectMap := map[string]string{"url": projectURL}
+			projects = append(projects, projectMap)
 		}
 	}
 
@@ -139,18 +141,12 @@ func handleProjects(serverResponse http.ResponseWriter, clientRequest *http.Requ
 		return
 	}
 
-	// Extract project names from the README content
+	// Extract project URLs from the README content
 	projects := GetProjects(readmeContent)
 
-	// Create a slice of ProjectJSON
-	projectJSON := make([]ProjectJSON, len(projects))
-	for i, projectName := range projects {
-		projectJSON[i] = ProjectJSON{Name: projectName}
-	}
-
 	// Create a map with a "projects" key
-	responseMap := map[string][]ProjectJSON{
-		"projects": projectJSON,
+	responseMap := map[string][]map[string]string{
+		"projects": projects,
 	}
 
 	// Marshal the response map into JSON format
