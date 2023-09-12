@@ -66,8 +66,9 @@ func (g *RealReadmeGetter) GetREADME() (string, error) {
 	return readmeContent, nil
 }
 
-func GetProjects() string{
-	return "list of projects"
+// GetProjects extracts GitHub repo names from README content.
+func GetProjects(readmeContent string) string {
+	return readmeContent
 }
 
 func handleHelloWorld(serverResponse http.ResponseWriter, clientRequest *http.Request) {
