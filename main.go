@@ -66,6 +66,10 @@ func (g *RealReadmeGetter) GetREADME() (string, error) {
 	return readmeContent, nil
 }
 
+func GetProjects() string{
+	return "list of projects"
+}
+
 func handleHelloWorld(serverResponse http.ResponseWriter, clientRequest *http.Request) {
 	// If the path is not /projects, it responds with an HTTP 404 "Not Found" status by calling http.NotFound.
 	if clientRequest.URL.Path != "/projects" {

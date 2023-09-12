@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"testing"
 
 	"net/http"
@@ -66,4 +67,13 @@ func TestHandleReadme(t *testing.T) {
     if w.Code != http.StatusInternalServerError {
         t.Errorf("Expected status code %d, got %d", http.StatusInternalServerError, w.Code)
     }
+}
+
+
+func TestGetProjects(t *testing.T){
+	result := GetProjects()
+
+	if reflect.TypeOf(result).Kind() != reflect.String {
+		t.Errorf("Expected a string, got %v", reflect.TypeOf(result))
+	}
 }
