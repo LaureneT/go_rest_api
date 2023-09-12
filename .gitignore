@@ -1,0 +1,15 @@
+# Compiled Object files, Static and Dynamic libs
+*.o
+*.a
+*.so
+
+# Compiled Go packages
+*.test
+*.prof
+
+# Compiled Output
+bin/
+dist/
+
+# Dependency directories (remove these if you plan to include dependencies in your repository)
+vendor/
