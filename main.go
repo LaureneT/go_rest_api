@@ -8,7 +8,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-
+	"github.com/spf13/viper"
+	
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 )
@@ -21,10 +22,27 @@ import (
 func getREADME() (string, error) {
 	// Create a context
     ctx := context.Background()
+
+	// Load the configuration file (assumes it's in the same directory)
+	viper.SetConfigFile("config.json")
+	if err := viper.ReadInConfig(); err != nil {
+		// Handle errors loading the configuration file
+		// ...
+	}
 	
+    // Retrieve the GitHub access token from the configuration file
+    githubAccessToken := viper.GetString("github_access_token")
+    if githubAccessToken == "" {
+        // Handle the case where the access token is missing or empty in the configuration file
+        // ...
+    }
+
+	// Use the githubAccessToken variable in your code
+    fmt.Println("GitHub Access Token:", githubAccessToken)
+
 	// Create a GitHub client with your personal access token
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: "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"},
+		&oauth2.Token{AccessToken: githubAccessToken},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)

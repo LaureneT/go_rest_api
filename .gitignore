@@ -13,3 +13,6 @@ dist/
 
 # Dependency directories (remove these if you plan to include dependencies in your repository)
 vendor/
+
+
+config.json
