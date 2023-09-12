@@ -92,14 +92,14 @@ func GetProjects(readmeContent string) []string {
 
 func handleHelloWorld(serverResponse http.ResponseWriter, clientRequest *http.Request) {
 	// If the path is not /projects, it responds with an HTTP 404 "Not Found" status by calling http.NotFound.
-	if clientRequest.URL.Path != "/projects" {
+	if clientRequest.URL.Path != "/hello" {
 		http.NotFound(serverResponse, clientRequest)
 	}
-	fmt.Fprintln(serverResponse, "Hello, this is your /projects endpoint!")
+	fmt.Fprintln(serverResponse, "Hello world!")
 }
 
 func handleReadme(serverResponse http.ResponseWriter, clientRequest *http.Request, readmeGetter ReadmeGetter) {
-	if clientRequest.URL.Path != "/projects" {
+	if clientRequest.URL.Path != "/readme" {
 		http.NotFound(serverResponse, clientRequest)
 		return
 	}
@@ -155,10 +155,13 @@ func main() {
 	realReadmeGetter := &RealReadmeGetter{}
 
 	// Set up the route and inject the RealReadmeGetter instance
+	http.HandleFunc("/readme", func(w http.ResponseWriter, r *http.Request) {
+		handleReadme(w, r, realReadmeGetter)
+	})
 	http.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
 		handleProjects(w, r, realReadmeGetter)
 	})
-	//http.HandleFunc("/projects", handleHelloWorld)
+	http.HandleFunc("/hello", handleHelloWorld)
 
 	fmt.Println("Server started on :8080")
 
