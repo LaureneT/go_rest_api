@@ -20,7 +20,13 @@ import (
 // building HTTP servers and clients.
 // "github.com/google/go-github/github" package to interact with the GitHub API.
 
-func getREADME() (string, error) {
+type ReadmeGetter interface {
+	GetREADME() (string, error)
+}
+
+type RealReadmeGetter struct{}
+
+func (g *RealReadmeGetter) GetREADME() (string, error) {
 	// Create a context
 	ctx := context.Background()
 
@@ -68,14 +74,14 @@ func handleHelloWorld(serverResponse http.ResponseWriter, clientRequest *http.Re
 	fmt.Fprintln(serverResponse, "Hello, this is your /projects endpoint!")
 }
 
-func handleReadme(serverResponse http.ResponseWriter, clientRequest *http.Request) {
+func handleReadme(serverResponse http.ResponseWriter, clientRequest *http.Request, readmeGetter ReadmeGetter) {
 	if clientRequest.URL.Path != "/projects" {
 		http.NotFound(serverResponse, clientRequest)
 		return
 	}
 
 	// Fetch the README content from GitHub
-	readmeContent, err := getREADME()
+	readmeContent, err := readmeGetter.GetREADME()
 	if err != nil {
 		http.Error(serverResponse, "Error fetching README", http.StatusInternalServerError)
 		fmt.Println("Error fetching README:", err)
@@ -95,8 +101,13 @@ func main() {
 		Addr: ":8080",
 	}
 
-	// Set up routes
-	http.HandleFunc("/projects", handleReadme)
+	// Create an instance of RealReadmeGetter
+	realReadmeGetter := &RealReadmeGetter{}
+
+	// Set up the route and inject the RealReadmeGetter instance
+	http.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
+		handleReadme(w, r, realReadmeGetter)
+	})
 	//http.HandleFunc("/projects", handleHelloWorld)
 
 	fmt.Println("Server started on :8080")
