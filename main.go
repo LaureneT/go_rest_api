@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"encoding/json"
 
 	"github.com/spf13/viper"
 
@@ -119,6 +120,11 @@ func handleReadme(serverResponse http.ResponseWriter, clientRequest *http.Reques
 	fmt.Fprintln(serverResponse, readmeContent)
 }
 
+// ProjectJSON represents the JSON structure for projects.
+type ProjectJSON struct {
+	Name string `json:"name"`
+}
+
 func handleProjects(serverResponse http.ResponseWriter, clientRequest *http.Request, readmeGetter ReadmeGetter) {
 	if clientRequest.URL.Path != "/projects" {
 		http.NotFound(serverResponse, clientRequest)
@@ -136,13 +142,30 @@ func handleProjects(serverResponse http.ResponseWriter, clientRequest *http.Requ
 	// Extract project names from the README content
 	projects := GetProjects(readmeContent)
 
-	// Set the response content type to plain text
-	serverResponse.Header().Set("Content-Type", "text/plain")
-
-	// Send the list of project names as the HTTP response
-	for _, projectName := range projects {
-		fmt.Fprintln(serverResponse, projectName)
+	// Create a slice of ProjectJSON
+	projectJSON := make([]ProjectJSON, len(projects))
+	for i, projectName := range projects {
+		projectJSON[i] = ProjectJSON{Name: projectName}
 	}
+
+	// Create a map with a "projects" key
+	responseMap := map[string][]ProjectJSON{
+		"projects": projectJSON,
+	}
+
+	// Marshal the response map into JSON format
+	responseJSON, err := json.Marshal(responseMap)
+	if err != nil {
+		http.Error(serverResponse, "Error encoding JSON", http.StatusInternalServerError)
+		fmt.Println("Error encoding JSON:", err)
+		return
+	}
+
+	// Set the response content type to JSON
+	serverResponse.Header().Set("Content-Type", "application/json")
+
+	// Send the JSON response as the HTTP response
+	serverResponse.Write(responseJSON)
 }
 
 func main() {

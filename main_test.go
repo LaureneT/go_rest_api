@@ -32,7 +32,7 @@ func TestHandleReadme(t *testing.T) {
     }
 
 	// Create a mock HTTP request for testing
-	req := httptest.NewRequest("GET", "/projects", nil)
+	req := httptest.NewRequest("GET", "/readme", nil)
 	// Create a mock HTTP response recorder
 	w := httptest.NewRecorder()
 
@@ -61,7 +61,7 @@ func TestHandleReadme(t *testing.T) {
 
     // Test case: README Getter returns an error
     mockGetter.MockedError = errors.New("README fetch error")
-    req = httptest.NewRequest("GET", "/projects", nil)
+    req = httptest.NewRequest("GET", "/readme", nil)
     w = httptest.NewRecorder()
     handleReadme(w, req, mockGetter)
     if w.Code != http.StatusInternalServerError {
