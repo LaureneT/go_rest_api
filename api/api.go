@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"regexp"
 
 	"github.com/LaureneT/go_rest_api/network"
+	"github.com/LaureneT/go_rest_api/processing"
 )
 
 func HandleHelloWorld(serverResponse http.ResponseWriter, clientRequest *http.Request) {
@@ -52,7 +52,7 @@ func HandleProjects(serverResponse http.ResponseWriter, clientRequest *http.Requ
 	}
 
 	// Extract project URLs from the README content
-	projects := GetProjects(readmeContent)
+	projects := processing.GetProjects(readmeContent)
 
 	// Create a map with a "projects" key
 	responseMap := map[string][]map[string]string{
@@ -72,29 +72,4 @@ func HandleProjects(serverResponse http.ResponseWriter, clientRequest *http.Requ
 
 	// Send the JSON response as the HTTP response
 	serverResponse.Write(responseJSON)
-}
-
-// GetProjects extracts GitHub repo URLs from README content.
-func GetProjects(readmeContent string) []map[string]string {
-	// Define a regular expression pattern to match GitHub repo URLs
-	re := regexp.MustCompile(`github\.com/([\w\-]+)/([\w\-]+)`)
-
-	// Find all matches in the README content
-	matches := re.FindAllStringSubmatch(readmeContent, -1)
-
-	// Extract the matched repo URLs
-	var projects []map[string]string
-	for _, match := range matches {
-		if len(match) == 3 {
-			// The first element is the full match, the second and third elements are the owner and repo names
-			owner := match[1]
-			repo := match[2]
-			// Construct the GitHub project URL
-			projectURL := "https://github.com/" + owner + "/" + repo
-			projectMap := map[string]string{"url": projectURL}
-			projects = append(projects, projectMap)
-		}
-	}
-
-	return projects
 }
