@@ -10,6 +10,8 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/spf13/viper"
 	"golang.org/x/oauth2"
+
+	"github.com/LaureneT/go_rest_api/network"
 )
 
 func HandleHelloWorld(serverResponse http.ResponseWriter, clientRequest *http.Request) {
@@ -26,7 +28,7 @@ func HandleReadme(serverResponse http.ResponseWriter, clientRequest *http.Reques
 	}
 
 	// Fetch the README content from GitHub
-	readmeContent, err := GetREADME()
+	readmeContent, err := network.FetchReadmeFromGitHub()
 	if err != nil {
 		http.Error(serverResponse, "Error fetching README", http.StatusInternalServerError)
 		fmt.Println("Error fetching README:", err)
