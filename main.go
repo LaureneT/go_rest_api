@@ -7,20 +7,18 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"net/http"
+	"fmt" // "fmt": This package provides functions for formatted input and output.
+	"net/http"  // "net/http": This package is part of Go's standard library and is used for
+				// building HTTP servers and clients.
 	"regexp"
 
 	"github.com/spf13/viper"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/github" // "github.com/google/go-github/github" package to interact with the GitHub API.
 	"golang.org/x/oauth2"
-)
 
-// "fmt": This package provides functions for formatted input and output.
-// "net/http": This package is part of Go's standard library and is used for
-// building HTTP servers and clients.
-// "github.com/google/go-github/github" package to interact with the GitHub API.
+	"github.com/LaureneT/go_rest_api/api"
+)
 
 type ReadmeGetter interface {
 	GetREADME() (string, error)
@@ -93,13 +91,13 @@ func GetProjects(readmeContent string) []map[string]string {
 	return projects
 }
 
-func handleHelloWorld(serverResponse http.ResponseWriter, clientRequest *http.Request) {
-	// If the path is not /projects, it responds with an HTTP 404 "Not Found" status by calling http.NotFound.
-	if clientRequest.URL.Path != "/hello" {
-		http.NotFound(serverResponse, clientRequest)
-	}
-	fmt.Fprintln(serverResponse, "Hello world!")
-}
+// func handleHelloWorld(serverResponse http.ResponseWriter, clientRequest *http.Request) {
+// 	// If the path is not /projects, it responds with an HTTP 404 "Not Found" status by calling http.NotFound.
+// 	if clientRequest.URL.Path != "/hello" {
+// 		http.NotFound(serverResponse, clientRequest)
+// 	}
+// 	fmt.Fprintln(serverResponse, "Hello world!")
+// }
 
 func handleReadme(serverResponse http.ResponseWriter, clientRequest *http.Request, readmeGetter ReadmeGetter) {
 	if clientRequest.URL.Path != "/readme" {
@@ -128,7 +126,7 @@ type ProjectJSON struct {
 }
 
 func handleProjects(serverResponse http.ResponseWriter, clientRequest *http.Request, readmeGetter ReadmeGetter) {
-	if clientRequest.URL.Path != "/projects" {
+	if clientRequest.URL.Path != "/projects" { // Necessary ?
 		http.NotFound(serverResponse, clientRequest)
 		return
 	}
@@ -157,7 +155,7 @@ func handleProjects(serverResponse http.ResponseWriter, clientRequest *http.Requ
 		return
 	}
 
-	// Set the response content type to JSON
+	// Set the response content type to JSON 
 	serverResponse.Header().Set("Content-Type", "application/json")
 
 	// Send the JSON response as the HTTP response
@@ -180,9 +178,9 @@ func main() {
 	http.HandleFunc("/projects", func(w http.ResponseWriter, r *http.Request) {
 		handleProjects(w, r, realReadmeGetter)
 	})
-	http.HandleFunc("/hello", handleHelloWorld)
+	http.HandleFunc("/hello", api.HandleHelloWorld)
 
-	fmt.Println("Server started on :8080")
+	fmt.Println("Server started on", server.Addr)
 
 	// Start the server and handle errors
 	if err := server.ListenAndServe(); err != nil {
