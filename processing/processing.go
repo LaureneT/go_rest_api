@@ -36,6 +36,21 @@ type Project struct {
 }
 
 func FormatToJSON(projects []Project) (string, error) {
+	if len(projects) == 0 {
+		// If projects is empty, create an empty JSON structure
+		emptyJSON := map[string][]map[string]string{
+			"projects": {},
+		}
+
+		// Marshal the empty JSON structure into JSON format
+		responseJSON, err := json.Marshal(emptyJSON)
+		if err != nil {
+			return "", err
+		}
+
+		return string(responseJSON), nil
+	}
+
 	// Create a slice to hold the URLs
 	var projectURLs []map[string]string
 
