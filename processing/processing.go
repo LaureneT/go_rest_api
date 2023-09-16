@@ -1,9 +1,12 @@
 package processing
 
-import "regexp"
+import (
+	"encoding/json"
+	"regexp"
+)
 
-// GetProjects extracts GitHub repo URLs from README content.
-func GetProjects(readmeContent string) []map[string]string {
+// ExtractProjectsFromReadme extracts GitHub repo URLs from README content.
+func ExtractProjectsFromReadme(readmeContent string) ([]map[string]string, error) {
 	// Define a regular expression pattern to match GitHub repo URLs
 	re := regexp.MustCompile(`github\.com/([\w\-]+)/([\w\-]+)`)
 
@@ -24,5 +27,21 @@ func GetProjects(readmeContent string) []map[string]string {
 		}
 	}
 
-	return projects
+	return projects, nil
+}
+
+
+func FormatToJSON(projects []map[string]string) (string, error) {
+	// Create a map with a "projects" key
+	responseMap := map[string][]map[string]string{
+		"projects": projects,
+	}
+
+	// Marshal the response map into JSON format
+	responseJSON, err := json.Marshal(responseMap)
+	if err != nil {
+		return "", err
+	}
+
+	return string(responseJSON), nil
 }

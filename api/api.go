@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -52,24 +51,21 @@ func HandleProjects(serverResponse http.ResponseWriter, clientRequest *http.Requ
 	}
 
 	// Extract project URLs from the README content
-	projects := processing.GetProjects(readmeContent)
-
-	// Create a map with a "projects" key
-	responseMap := map[string][]map[string]string{
-		"projects": projects,
-	}
-
-	// Marshal the response map into JSON format
-	responseJSON, err := json.Marshal(responseMap)
+	projects, err := processing.ExtractProjectsFromReadme(readmeContent)
 	if err != nil {
-		http.Error(serverResponse, "Error encoding JSON", http.StatusInternalServerError)
-		fmt.Println("Error encoding JSON:", err)
+		http.Error(serverResponse, "Failed to extract project names", http.StatusInternalServerError)
 		return
 	}
 
-	// Set the response content type to JSON
-	serverResponse.Header().Set("Content-Type", "application/json")
+	// format the data to JSON
+	responseJSON, err := processing.FormatToJSON(projects)
+	if err != nil {
+		http.Error(serverResponse, "Failed to format data to JSON", http.StatusInternalServerError)
+		return
+	}
 
-	// Send the JSON response as the HTTP response
-	serverResponse.Write(responseJSON)
+	// Send the JSON response
+	serverResponse.Header().Set("Content-Type", "application/json")
+	serverResponse.WriteHeader(http.StatusOK)
+	serverResponse.Write([]byte(responseJSON))
 }
