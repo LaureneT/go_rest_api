@@ -32,17 +32,7 @@ This project uses a `config.json` file to manage configuration settings, includi
 
 1. Locate the `config.json.example` file in the project's root directory.
 2. Make a copy of `config.json.example` and rename it to `config.json`.
-3. Open `config.json` using a text editor of your choice.
-
-### Adding Your GitHub Access Token
-
-In `config.json`, you will find a placeholder for the GitHub access token:
-
-```json
-{
-  "github_access_token": "YOUR_GITHUB_ACCESS_TOKEN"
-}
-```
+3. Open `config.json`and set the token and repo variables.
 
 ## Usage
 
@@ -64,7 +54,7 @@ To build the project, execute:
 go build
 ```
 
-# run
+# Run
 To run the API, use the following command:
 ```sh
 ./go_rest_api.exe
