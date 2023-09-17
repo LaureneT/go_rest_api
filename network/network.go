@@ -9,7 +9,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func FetchReadmeFromGitHub() (string, error) {
+func FetchReadmeFromGitHub(repoOwner string, repoName string) (string, error) {
 	// Create a context
 	ctx := context.Background()
 
@@ -31,11 +31,9 @@ func FetchReadmeFromGitHub() (string, error) {
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
-	owner := "avelino"
-	repo := "awesome-go"
 
 	// Fetch the README file from the repository
-	readme, _, err := client.Repositories.GetReadme(ctx, owner, repo, nil)
+	readme, _, err := client.Repositories.GetReadme(ctx, repoOwner, repoName, nil)
 	if err != nil {
 		return "", fmt.Errorf("error fetching README: %v", err)
 	}

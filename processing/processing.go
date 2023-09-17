@@ -6,19 +6,20 @@ import (
 	"strings"
 )
 
-// ExtractProjectsFromReadme extracts GitHub repo URLs from README content.
-func ExtractProjectsFromReadme(readmeContent string) ([]Project, error) {
-	// Define a regular expression pattern to match GitHub repo URLs
-	re := regexp.MustCompile(`github\.com/([\w\-]+)/([\w\-]+)`)
+type Project struct {
+	Name string
+	URL  string
+}
 
-	// Find all matches in the README content
+func ExtractProjectsFromReadme(readmeContent string) ([]Project) {
+	// Define a regular expression pattern to match GitHub repo URLs
+	re := regexp.MustCompile(`https?://github\.com/([\w\-]+)/([\w\-]+)/?`)
+
 	matches := re.FindAllStringSubmatch(readmeContent, -1)
 
-	// Extract the matched repo URLs
 	var projects []Project
 	for _, match := range matches {
 		if len(match) == 3 {
-			// The first element is the full match, the second and third elements are the owner and repo names
 			owner := match[1]
 			repo := match[2]
 			// Construct the GitHub project URL
@@ -27,28 +28,20 @@ func ExtractProjectsFromReadme(readmeContent string) ([]Project, error) {
 			projects = append(projects, project)
 		}
 	}
-
-	return projects, nil
+	return projects
 }
 
-type Project struct {
-	Name string
-	URL  string
-}
-
-func FormatToJSON(projects []Project) (string, error) {
+func JSONifyProjects(projects []Project) (string, error) {
 	if len(projects) == 0 {
 		// If projects is empty, create an empty JSON structure
 		emptyJSON := map[string][]map[string]string{
 			"projects": {},
 		}
 
-		// Marshal the empty JSON structure into JSON format
 		responseJSON, err := json.Marshal(emptyJSON)
 		if err != nil {
 			return "", err
 		}
-
 		return string(responseJSON), nil
 	}
 
@@ -80,7 +73,6 @@ func FormatToJSON(projects []Project) (string, error) {
 func FilterProjectsByName(projects []Project, name string) []Project {
 	var filteredProjects []Project
 	for _, project := range projects {
-		// Check if the project name contains the provided name
 		if strings.Contains(strings.ToLower(project.Name), strings.ToLower(name)) {
 			filteredProjects = append(filteredProjects, project)
 		}
