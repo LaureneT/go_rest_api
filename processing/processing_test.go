@@ -3,6 +3,7 @@ package processing_test
 import (
 	//"regexp"
 	"encoding/json"
+	"reflect"
 	"testing"
 
 	"github.com/LaureneT/go_rest_api/processing"
@@ -95,7 +96,6 @@ func TestFormatToJSON_EmptyInput(t *testing.T) {
 	assert.Equal(t, expectedJSON, parsedJSON, "Expected empty JSON structure")
 }
 
-
 func TestFilterProjectsByName(t *testing.T) {
 	// Sample projects for testing
 	projects := []processing.Project{
@@ -104,14 +104,12 @@ func TestFilterProjectsByName(t *testing.T) {
 		{Name: "AnotherProject", URL: "URL3"},
 	}
 
-	t.Run("Filter projects by name (case-insensitive)", func(t *testing.T) {
+	t.Run("Filter projects by name (case-sensitive)", func(t *testing.T) {
 		// Test filtering with a name that exists in project names
 		filtered := processing.FilterProjectsByName(projects, "project1")
-		if len(filtered) != 1 {
-			t.Errorf("Expected 1 project, got %d", len(filtered))
-		}
-		if filtered[0].Name != "Project1" {
-			t.Errorf("Expected 'Project1', got '%s'", filtered[0].Name)
+		expected := []processing.Project{{Name: "Project1", URL: "URL1"}}
+		if !reflect.DeepEqual(expected, filtered) {
+			t.Errorf("Expected %v, got %v.", expected, filtered)
 		}
 
 		// Test filtering with a name that doesn't exist in project names
