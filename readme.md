@@ -1,6 +1,6 @@
 # My RESTful Go API
 
-Welcome to the My RESTful Go API! This API is built in Go and provides functionality for managing GitHub projects listed in the README of GitHub repositories.
+Welcome to the my project RESTful Go API. This API is built in Go and provides functionality for managing GitHub projects listed in the README of GitHub repositories.
 
 ## Table of Contents
 - [Getting Started](#getting-started)
@@ -17,7 +17,7 @@ Welcome to the My RESTful Go API! This API is built in Go and provides functiona
 ## Getting Started
 
 ### Prerequisites
-- Go 1.15+
+- Go 1.21+
 
 ### Installation
 1. Clone the repository: `git clone https://github.com/LaureneT/go_rest_api.git`
@@ -54,15 +54,18 @@ In `config.json`, you will find a placeholder for the GitHub access token:
 # Tests
 
 You can run tests using the following command:
+```sh
 go test
+```
 
 # Build
 To build the project, execute:
+```sh
 go build
+```
 
 # run
 To run the API, use the following command:
-
 ```sh
 ./go_rest_api.exe
 ```
