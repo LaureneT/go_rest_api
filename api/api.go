@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/LaureneT/go_rest_api/network"
 	"github.com/LaureneT/go_rest_api/processing"
@@ -42,6 +43,11 @@ func HandleProjects(serverResponse http.ResponseWriter, clientRequest *http.Requ
 		return
 	}
 
+	queryParams := clientRequest.URL.Query()
+	projectName := queryParams.Get("name")
+	// Remove curly braces from projectName if present
+	projectName = strings.Trim(projectName, "{}")
+
 	// Fetch the README content from GitHub
 	readmeContent, err := network.FetchReadmeFromGitHub()
 	if err != nil {
@@ -50,11 +56,16 @@ func HandleProjects(serverResponse http.ResponseWriter, clientRequest *http.Requ
 		return
 	}
 
-	// Extract project URLs from the README content
+	// Extract projects from the README content
 	projects, err := processing.ExtractProjectsFromReadme(readmeContent)
 	if err != nil {
 		http.Error(serverResponse, "Failed to extract project names", http.StatusInternalServerError)
 		return
+	}
+
+	// filter projects by name if a project_name is input
+	if projectName != "" {
+		projects = processing.FilterProjectsByName(projects, projectName)
 	}
 
 	// format the data to JSON
