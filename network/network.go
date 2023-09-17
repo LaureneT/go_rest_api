@@ -10,7 +10,6 @@ import (
 )
 
 func FetchReadmeFromGitHub(repoOwner string, repoName string) (string, error) {
-	// Create a context
 	ctx := context.Background()
 
 	// Load the configuration file
@@ -19,7 +18,7 @@ func FetchReadmeFromGitHub(repoOwner string, repoName string) (string, error) {
 		return "", fmt.Errorf("error reading config file: %v", err)
 	}
 
-	// Retrieve the GitHub access token from the configuration file
+	// Retrieve the GitHub access token 
 	githubAccessToken := viper.GetString("github_access_token")
 	if githubAccessToken == "" {
 		return "", fmt.Errorf("GitHub access token is missing or empty in the configuration file")
