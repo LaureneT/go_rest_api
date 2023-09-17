@@ -3,6 +3,7 @@ package processing
 import (
 	"encoding/json"
 	"regexp"
+	"strings"
 )
 
 // ExtractProjectsFromReadme extracts GitHub repo URLs from README content.
@@ -74,4 +75,15 @@ func FormatToJSON(projects []Project) (string, error) {
 	}
 
 	return string(responseJSON), nil
+}
+
+func FilterProjectsByName(projects []Project, name string) []Project {
+	var filteredProjects []Project
+	for _, project := range projects {
+		// Check if the project name contains the provided name
+		if strings.Contains(strings.ToLower(project.Name), strings.ToLower(name)) {
+			filteredProjects = append(filteredProjects, project)
+		}
+	}
+	return filteredProjects
 }

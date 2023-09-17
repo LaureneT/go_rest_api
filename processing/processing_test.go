@@ -3,6 +3,7 @@ package processing_test
 import (
 	//"regexp"
 	"encoding/json"
+	"reflect"
 	"testing"
 
 	"github.com/LaureneT/go_rest_api/processing"
@@ -93,4 +94,41 @@ func TestFormatToJSON_EmptyInput(t *testing.T) {
 		"projects": {},
 	}
 	assert.Equal(t, expectedJSON, parsedJSON, "Expected empty JSON structure")
+}
+
+func TestFilterProjectsByName(t *testing.T) {
+	// Sample projects for testing
+	projects := []processing.Project{
+		{Name: "Project1", URL: "URL1"},
+		{Name: "Project2", URL: "URL2"},
+		{Name: "AnotherProject", URL: "URL3"},
+	}
+
+	t.Run("Filter projects by name (case-sensitive)", func(t *testing.T) {
+		// Test filtering with a name that exists in project names
+		filtered := processing.FilterProjectsByName(projects, "project1")
+		expected := []processing.Project{{Name: "Project1", URL: "URL1"}}
+		if !reflect.DeepEqual(expected, filtered) {
+			t.Errorf("Expected %v, got %v.", expected, filtered)
+		}
+
+		// Test filtering with a name that doesn't exist in project names
+		filtered = processing.FilterProjectsByName(projects, "nonexistent")
+		if len(filtered) != 0 {
+			t.Errorf("Expected 0 projects, got %d", len(filtered))
+		}
+	})
+
+	t.Run("Filter projects by name (empty name)", func(t *testing.T) {
+		// Test filtering with an empty name
+		filtered := processing.FilterProjectsByName(projects, "")
+		if len(filtered) != len(projects) {
+			t.Errorf("Expected %d projects, got %d", len(projects), len(filtered))
+		}
+		for i, p := range projects {
+			if p != filtered[i] {
+				t.Errorf("Expected '%s', got '%s'", p.Name, filtered[i].Name)
+			}
+		}
+	})
 }
